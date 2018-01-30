@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>Top navbar example for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-top.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    {{/* Navbar html with a link to the home page calling a client name param from the config.toml as the link text - works normally */}}
+    <nav class="navbar sticky-top navbar-expand-md navbar-light bg-light">
+    <a class="navbar-brand" href="{{ .Site.Home.RelPermalink }}">{{ $.Site.Params.client }}</a>
+    	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+    		<span class="navbar-toggler-icon"></span>
+    	</button>
+    	<div class="collapse navbar-collapse" id="navbarNavDropdown">
+    		<ul class="navbar-nav mr-auto">
+    		{{/* within the <ul> tags is the template code I am calling written below to list the links to sections/articles */}}
+    			{{- template "section-nav" . -}}
+    		</ul>
+    	</div>
+    </nav>
+
+    {{/* define the template code to insert above */}}
+    {{- define "section-nav" -}}
+    {{/* set the parameter $home for the homepage */}}
+    {{ $home := $.Site.Home }}
+    	{{/* loop through the pages of the site by the title of the page */}}
+    	{{- range .Site.Pages.ByTitle -}}
+
+    		{{/* 1) conditional statment to find pages of kind "home" (the top level index page) */}}
+    		{{- if eq .Kind "home" -}}
+    		{{/* html to set it as a relative link to the hompage */}}
+    		<li class="nav-item "><a class="nav-link" href="{{ $home.RelPermalink }}">Home</a></li>
+
+    		{{/* 2) conditional statment to find top level single pages in the content directory  */}}
+    		{{- else if (.InSection $home) -}}
+    		{{/* html to set it as a link to the single page */}}
+    		<li class="nav-item "><a class="nav-link" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+
+    		{{/* 3) conditional statment to find section pages in order to make dropdown menu items from them */}}
+    		{{- else if eq .Kind "section" -}}
+    		{{/* setting a scratch variable to match the current section in the range */}}
+    		{{ $.Scratch.Set "section" . }}
+    			{{/* html to make a dropdown list item that can be clicked */}}
+    			<li class="nav-item dropdown ">
+    			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenu{{ urlize .Title }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ .Title }}</a>
+    			{{/* html to make a dropdown menu to list the links in */}}
+    			<div class="dropdown-menu" aria-labelledby="navbarDropdownMenu{{ urlize .Title }}">
+    			  <h6 class="dropdown-header">{{ .Title }}</h6>
+    				<div class="dropdown-divider"></div>
+    				{{/* loop through all the pages of the site */}}
+    				{{- range $.Site.Pages -}}
+    				{{/* try to find just the pages that are members of this section */}}
+    				{{- if .IsAncestor ($.Scratch.Get "section") }}
+    				{{/* link the pages that are members of the section */}}
+    				<a class="dropdown-item " href="{{ .RelPermalink }}">{{ .Title }}</a>
+    		  	{{- end -}}
+    				{{- end }}
+    			</div>
+    			</li>
+    		{{- end -}}
+    	{{- end -}}
+    {{- end -}}
+
+    <main role="main" class="container">
+    {{ block "main" . }}
+    {{ .Content }}
+    {{ end }}
+    </main>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>  </body>
+</html>
